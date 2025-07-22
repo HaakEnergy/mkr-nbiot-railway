@@ -4,6 +4,9 @@ import sqlite3
 app = Flask(__name__)
 DB_PATH = "data.db"
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 80)))
+
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
