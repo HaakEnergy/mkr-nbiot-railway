@@ -1,12 +1,11 @@
 from flask import Flask, request, jsonify
 import sqlite3
+import os
 
 app = Flask(__name__)
 DB_PATH = "data.db"
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 80)))
-
+# Datenbank initialisieren
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
@@ -24,14 +23,17 @@ def init_db():
 
 init_db()
 
+# Standardroute
 @app.route("/")
 def index():
     return "NB-IoT Railway Backend läuft."
 
+# POST-Daten empfangen
 @app.route("/api/data", methods=["POST"])
 def receive_data():
     data = request.get_json(force=True)
     print("Empfangen:", data)
+
     if not data:
         return jsonify({"error": "no data"}), 400
 
@@ -47,6 +49,7 @@ def receive_data():
     conn.close()
     return jsonify({"status": "success"}), 200
 
+# Daten abfragen
 @app.route("/api/data", methods=["GET"])
 def get_data():
     conn = sqlite3.connect(DB_PATH)
@@ -58,3 +61,7 @@ def get_data():
         {"id": r[0], "device": r[1], "timestamp": r[2], "signal": r[3], "temperature": r[4]}
         for r in rows
     ])
+
+# WICHTIG: Start erst ganz am Ende
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 80)))
